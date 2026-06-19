@@ -9,10 +9,7 @@ The backend API powering [CineTrack](https://movie-track-frontend.vercel.app/), 
 
 ## ✨ What it does
 
-- Serves trending, top Indian, and top Hollywood movies/shows to the frontend
-- Provides detailed title data — cast, crew, trailers, streaming availability, and similar-title recommendations
-- Powers actor/director filmography lookups
-- Handles user authentication via **JWT**, including secure password flows over email (Spring Mail)
+- Handles user authentication via **JWT**, including secure password.
 - Manages user-submitted reviews and ratings with persistence in a relational database
 
 ## 🛠️ Tech Stack
@@ -25,36 +22,6 @@ The backend API powering [CineTrack](https://movie-track-frontend.vercel.app/), 
 | Validation | Spring Validation |
 | Mapping | ModelMapper |
 | Email | Spring Boot Starter Mail |
-
-## 🚀 Running Locally
-
-```bash
-git clone https://github.com/yash-singh-45/MovieTrackBackend.git
-cd MovieTrackBackend
-```
-
-Configure your database and mail credentials in `src/main/resources/application.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/cinetrack
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=your_email
-spring.mail.password=your_app_password
-
-jwt.secret=your_jwt_secret
-```
-
-Then run:
-
-```bash
-./mvnw spring-boot:run
-```
-
-The API will start on `http://localhost:8080`.
 
 ## 📋 API Overview
 
