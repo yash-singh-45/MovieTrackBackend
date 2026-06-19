@@ -25,15 +25,14 @@ The backend API powering [CineTrack](https://movie-track-frontend.vercel.app/), 
 
 ## 📋 API Overview
 
-> _Fill this in with your actual endpoints, e.g.:_
-
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/auth/register` | Register a new user |
-| POST | `/api/auth/login` | Authenticate and receive a JWT |
-| GET | `/api/movies/trending` | Get trending titles |
-| GET | `/api/movies/{id}` | Get full details for a title |
-| POST | `/api/movies/{id}/reviews` | Submit a review/rating |
+| POST | `/auth/signup` | Register a new user |
+| POST | `/auth/login` | Authenticate and receive a JWT |
+| GET | `/api/users/{id}` | Get Users details |
+| GET | `/movies/trailer/{imdbId}` | Get trailer for a title |
+| POST | `/review/` | Submit a review/rating |
+| GET | `/review/{imdbId}` | Get review for a title |
 
 ## 🔗 Related
 
