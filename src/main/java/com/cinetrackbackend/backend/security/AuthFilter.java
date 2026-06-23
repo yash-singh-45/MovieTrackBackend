@@ -1,6 +1,7 @@
 package com.cinetrackbackend.backend.security;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,11 +27,14 @@ public class AuthFilter extends OncePerRequestFilter {
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
         try {
-            final String requestTokenHeader = request.getHeader("Authorization");
+
+            String requestTokenHeader = request.getHeader("Authorization");
 
             if (requestTokenHeader == null || !requestTokenHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
@@ -41,19 +45,24 @@ public class AuthFilter extends OncePerRequestFilter {
             String username = authUtil.getUsernameFromToken(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                User user = userRepository.findByUsername(username).orElseThrow();
-                if (authUtil.isTokenValid(token, user)) {
-                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                            user, null, user.getAuthorities());
 
-                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                Optional<User> optionalUser = userRepository.findByUsername(username);
+
+                if (optionalUser.isPresent() && authUtil.isTokenValid(token, optionalUser.get())) {
+
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            optionalUser.get().getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
 
             filterChain.doFilter(request, response);
+
         } catch (Exception ex) {
             handlerExceptionResolver.resolveException(request, response, null, ex);
         }
-    };
-
+    }
 }
