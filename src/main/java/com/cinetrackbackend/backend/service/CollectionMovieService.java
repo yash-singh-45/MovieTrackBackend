@@ -53,6 +53,7 @@ public class CollectionMovieService {
         collectionRepository.save(collection);
     }
 
+    @Transactional
     public List<MovieDto> getMoviesFromCollection(String publicId, String username){
         Collection collection = collectionRepository.findByPublicId(publicId)
         .orElseThrow( () -> new RuntimeException("Collection not found!!"));
