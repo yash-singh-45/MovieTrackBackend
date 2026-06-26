@@ -14,6 +14,7 @@ import com.cinetrackbackend.backend.dto.MovieDto;
 import com.cinetrackbackend.backend.repository.CollectionMovieRepository;
 import com.cinetrackbackend.backend.repository.CollectionRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,6 +25,7 @@ public class CollectionMovieService {
     private final MovieService movieService;
     private final ModelMapper modelMapper;
 
+    @Transactional
     public void addMovieToCollection(CollectionMovieRequestDto requestData, String username){
         Collection collection = collectionRepository.findById(requestData.getCollectionId())
         .orElseThrow( ()-> new RuntimeException("Collection not found"));
