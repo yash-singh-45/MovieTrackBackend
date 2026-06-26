@@ -12,6 +12,7 @@ import com.cinetrackbackend.backend.entity.User;
 import com.cinetrackbackend.backend.repository.CollectionRepository;
 import com.cinetrackbackend.backend.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -69,6 +70,7 @@ public class CollectionService {
         return response;
     }
 
+    @Transactional
     public CollectionResponseDto deleteCollection(Long id, String username) {
 
         Collection collection = collectionRepository.findById(id)
@@ -85,6 +87,7 @@ public class CollectionService {
         return response;
     }
 
+    @Transactional
     public CollectionResponseDto getCollectionInfo(String publicId){
         Collection collection = collectionRepository.findByPublicId(publicId)
         .orElseThrow(() -> new RuntimeException("Collection not found"));
