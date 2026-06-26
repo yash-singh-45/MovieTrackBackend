@@ -17,12 +17,12 @@ public class MovieService {
     private final MovieRepository movieRepository;
 
     public Movie getOrCreateMovie(MovieDto requestMovie){
-        return movieRepository.findByImdbId(requestMovie.imdbId).orElseGet(()->{
+        return movieRepository.findByImdbId(requestMovie.getImdbId()).orElseGet(()->{
             Movie movie = new Movie();
-            movie.setImdbId(requestMovie.imdbId);
-            movie.setPosterPath(requestMovie.posterPath);
-            movie.setRating(requestMovie.rating);
-            movie.setTitle(requestMovie.title);
+            movie.setImdbId(requestMovie.getImdbId());
+            movie.setPosterPath(requestMovie.getPosterPath());
+            movie.setRating(requestMovie.getRating());
+            movie.setTitle(requestMovie.getTitle());
             
             return movieRepository.save(movie);
         });

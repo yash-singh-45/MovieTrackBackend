@@ -2,6 +2,7 @@ package com.cinetrackbackend.backend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -55,6 +56,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/ping").permitAll()
                         .requestMatchers("/review/{imdbId}**").permitAll()
                         .requestMatchers("/movies/**").permitAll()
+                        .requestMatchers("/collection/{publicId}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/collectionmovie/get/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
