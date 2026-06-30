@@ -81,7 +81,8 @@ public class CollectionService {
         }
 
         CollectionResponseDto response = modelMapper.map(collection, CollectionResponseDto.class);
-
+        response.setUsername(username);
+        
         collectionRepository.delete(collection);
 
         return response;

@@ -3,6 +3,7 @@ package com.cinetrackbackend.backend.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.cinetrackbackend.backend.dto.TmdbSimilarResponseDto;
 import com.cinetrackbackend.backend.dto.TrailerResponse;
 import com.cinetrackbackend.backend.service.TmdbService;
 
@@ -28,6 +29,13 @@ public class MovieController {
         }
 
         return ResponseEntity.ok(new TrailerResponse(trailerUrl));
+    }
+
+    @GetMapping("/similar/{imdbId}")
+    public ResponseEntity<TmdbSimilarResponseDto> getSimilarMovies(@PathVariable String imdbId) {
+        return tmdbService.getSimilarMovies(imdbId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
