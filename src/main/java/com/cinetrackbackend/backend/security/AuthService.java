@@ -54,14 +54,14 @@ public class AuthService {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(
                 () -> new IllegalArgumentException("Invalid Credentials"));
 
-        System.out.println("User found: " + user.getUsername());
-        System.out.println("Stored password hash: " + user.getPassword());
-        System.out.println("Password matches: " + passwordEncoder.matches(request.getPassword(), user.getPassword()));
+        // System.out.println("User found: " + user.getUsername());
+        // System.out.println("Stored password hash: " + user.getPassword());
+        // System.out.println("Password matches: " + passwordEncoder.matches(request.getPassword(), user.getPassword()));
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        String token = authUtil.generateAccessToken((User) authentication.getPrincipal());
+        String token = authUtil.generateAccessToken((User) authentication.getPrincipal()); 
 
         return new LoginResponseDto(token, user.getId());
     }

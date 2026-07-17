@@ -14,6 +14,8 @@ import com.cinetrackbackend.backend.dto.TmdbSimilarResponseDto;
 import com.cinetrackbackend.backend.dto.TmdbVideoResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Slf4j
@@ -131,4 +133,32 @@ public class TmdbService {
             return Optional.empty();
         }
     }
+
+    public String searchPersons(String query) {
+        String url = "https://api.themoviedb.org/3/search/person"
+                + "?api_key=" + apiKey
+                + "&query=" + query
+                + "&include_adult=false"
+                + "&language=en-US"
+                + "&page=1";
+
+        return restTemplate.getForObject(url, String.class);
+    }
+
+    public String getHeroMovies() {
+        String url = "https://api.themoviedb.org/3/trending/all/week" + "?api_key=" + apiKey;
+
+        return restTemplate.getForObject(url, String.class);
+    }
+
+    public String getImdbId(String tmdbId, String mediaType) {
+
+        String url = "https://api.themoviedb.org/3/"
+                + mediaType + "/"
+                + tmdbId
+                + "?api_key=" + apiKey;
+
+        return restTemplate.getForObject(url, String.class);
+    }
+
 }

@@ -58,6 +58,7 @@ public class SecurityConfig {
                         .requestMatchers("/movies/**").permitAll()
                         .requestMatchers("/collection/{publicId}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/collectionmovie/get/**").permitAll()
+                        .requestMatchers("/tmdbapi/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
