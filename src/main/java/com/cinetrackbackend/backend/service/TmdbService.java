@@ -1,5 +1,6 @@
 package com.cinetrackbackend.backend.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,14 +9,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriUtils;
 
 import com.cinetrackbackend.backend.dto.TmdbFindResponse;
 import com.cinetrackbackend.backend.dto.TmdbSimilarResponseDto;
 import com.cinetrackbackend.backend.dto.TmdbVideoResponse;
 
 import lombok.extern.slf4j.Slf4j;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Slf4j
@@ -161,4 +161,22 @@ public class TmdbService {
         return restTemplate.getForObject(url, String.class);
     }
 
+    public String getTmdbId(String query) {
+        String url = "https://api.themoviedb.org/3/search/person"
+                + "?api_key=" + apiKey
+                + "&query=" + UriUtils.encode(query, StandardCharsets.UTF_8)
+                + "&include_adult=false"
+                + "&language=en-US"
+                + "&page=1";
+
+        return restTemplate.getForObject(url, String.class);
+    }
+
+    public String getCelebsData(String tmdbid) {
+        String url = "https://api.themoviedb.org/3/person/" +
+                tmdbid +
+                "?api_key=" + apiKey + "&append_to_response=combined_credits";
+
+                return restTemplate.getForObject(url, String.class);
+    }
 }

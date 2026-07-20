@@ -10,6 +10,7 @@ import com.cinetrackbackend.backend.service.TmdbService;
 
 import lombok.RequiredArgsConstructor;
 
+
 @RestController
 @RequestMapping("/tmdbapi")
 @RequiredArgsConstructor
@@ -31,4 +32,15 @@ public class TmdbController {
     public ResponseEntity<String> getImdbId(@PathVariable String media_type, @PathVariable String tmdbId){
         return ResponseEntity.ok(tmdbService.getImdbId(tmdbId, media_type));
     }
+
+    @GetMapping("/persons/id/{name}")
+    public ResponseEntity<String> getPersonId(@PathVariable String name) {
+        return ResponseEntity.ok(tmdbService.getTmdbId(name));
+    }
+
+    @GetMapping("/persons/data/{id}")
+    public ResponseEntity<String> getPersonData(@PathVariable String id) {
+        return ResponseEntity.ok(tmdbService.getCelebsData(id));
+    }
+    
 }
