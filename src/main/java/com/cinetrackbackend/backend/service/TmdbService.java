@@ -175,7 +175,7 @@ public class TmdbService {
     public String getCelebsData(String tmdbid) {
         String url = "https://api.themoviedb.org/3/person/" +
                 tmdbid +
-                "?api_key=" + apiKey + "&append_to_response=combined_credits";
+                "?api_key=" + apiKey + "&append_to_response=combined_credits,external_ids";
 
                 return restTemplate.getForObject(url, String.class);
     }
