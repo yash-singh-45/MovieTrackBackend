@@ -20,9 +20,9 @@ public class MovieController {
 
     private final TmdbService tmdbService;
 
-    @GetMapping("/trailer/{imdbId}")
-    public ResponseEntity<TrailerResponse> getTrailerKey(@PathVariable String imdbId) {
-        String trailerUrl = tmdbService.getTrailerByImdbId(imdbId);
+    @GetMapping("/trailer/{imdbId}/{type}")
+    public ResponseEntity<TrailerResponse> getTrailerKey(@PathVariable String imdbId, @PathVariable String type) {
+        String trailerUrl = tmdbService.getTrailerByImdbId(imdbId, type);
 
         if (trailerUrl == null) {
             return ResponseEntity.notFound().build();
@@ -31,9 +31,9 @@ public class MovieController {
         return ResponseEntity.ok(new TrailerResponse(trailerUrl));
     }
 
-    @GetMapping("/similar/{imdbId}")
-    public ResponseEntity<TmdbSimilarResponseDto> getSimilarMovies(@PathVariable String imdbId) {
-        return tmdbService.getSimilarMovies(imdbId)
+    @GetMapping("/similar/{imdbId}/{type}")
+    public ResponseEntity<TmdbSimilarResponseDto> getSimilarMovies(@PathVariable String imdbId, @PathVariable String type) {
+        return tmdbService.getSimilarMovies(imdbId, type)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

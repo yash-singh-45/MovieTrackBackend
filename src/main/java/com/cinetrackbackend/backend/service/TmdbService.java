@@ -1,6 +1,10 @@
 package com.cinetrackbackend.backend.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
 import com.cinetrackbackend.backend.dto.TmdbFindResponse;
+import com.cinetrackbackend.backend.dto.TmdbLookUpResult;
 import com.cinetrackbackend.backend.dto.TmdbSimilarResponseDto;
 import com.cinetrackbackend.backend.dto.TmdbVideoResponse;
 
@@ -33,19 +38,22 @@ public class TmdbService {
         this.restTemplate = restTemplate;
     }
 
-    public String getTrailerByImdbId(String imdbId) {
-        return resolveTmdbId(imdbId)
-                .map(tmdbId -> {
+    public String getTrailerByImdbId(String imdbId, String type) {
+
+        System.out.println("GetTrailer Function Called");
+        return resolveTmdbId(imdbId, type)
+                .map(tmdbLookUp -> {
                     String videoUrl = UriComponentsBuilder
-                            .fromUriString(baseUrl + "/movie/" + tmdbId + "/videos")
+                            .fromUriString(baseUrl + "/" + type + "/" + tmdbLookUp.getTmdbId() + "/videos")
                             .queryParam("api_key", apiKey)
                             .toUriString();
 
-                    TmdbVideoResponse videoResponse = restTemplate
-                            .getForObject(videoUrl, TmdbVideoResponse.class);
+                            System.out.println("VideoUrl" + videoUrl);
+                    TmdbVideoResponse videoResponse = restTemplate.getForObject(videoUrl, TmdbVideoResponse.class);
 
-                    if (videoResponse == null)
+                    if (videoResponse == null) {
                         return null;
+                    }
 
                     return videoResponse.getResults().stream()
                             .filter(v -> "Trailer".equals(v.getType())
@@ -57,17 +65,53 @@ public class TmdbService {
                 .orElse(null);
     }
 
-    public Optional<TmdbSimilarResponseDto> getSimilarMovies(Long tmdbId) {
+    public Optional<TmdbSimilarResponseDto> getSimilarMovies(TmdbLookUpResult lookup, String type) {
+
+        Long tmdbId = lookup.getTmdbId();
+        String og_lang = lookup.getOriginalLanguage();
+
         try {
-            String url = UriComponentsBuilder
-                    .fromUriString(baseUrl + "/movie/" + tmdbId + "/similar")
+            String rec_url = UriComponentsBuilder
+                    .fromUriString(baseUrl + "/" + type + "/" + tmdbId + "/recommendations")
                     .queryParam("api_key", apiKey)
                     .toUriString();
 
-            log.info("Calling TMDB Similar API: {}", url);
+            String similar_url = UriComponentsBuilder
+                    .fromUriString(baseUrl + "/" + type + "/" + tmdbId + "/similar")
+                    .queryParam("api_key", apiKey)
+                    .toUriString();
 
-            return Optional.ofNullable(
-                    restTemplate.getForObject(url, TmdbSimilarResponseDto.class));
+            TmdbSimilarResponseDto recommendations = restTemplate.getForObject(rec_url, TmdbSimilarResponseDto.class);
+
+            TmdbSimilarResponseDto similar = restTemplate.getForObject(similar_url, TmdbSimilarResponseDto.class);
+
+            List<TmdbSimilarResponseDto.TmdbMovieResult> all = new ArrayList<>();
+
+            if (recommendations != null && recommendations.getResults() != null)
+                all.addAll(recommendations.getResults());
+
+            if (similar != null && similar.getResults() != null)
+                all.addAll(similar.getResults());
+
+            // Remove duplicates
+            Map<Long, TmdbSimilarResponseDto.TmdbMovieResult> unique = new LinkedHashMap<>();
+            for (TmdbSimilarResponseDto.TmdbMovieResult movie : all) {
+                unique.putIfAbsent(movie.getId(), movie);
+            }
+
+            // Keep only same-language movies
+            List<TmdbSimilarResponseDto.TmdbMovieResult> filtered = unique.values()
+                    .stream()
+                    .filter(movie -> og_lang.equals(movie.getOriginalLanguage()))
+                    .toList();
+
+            TmdbSimilarResponseDto response = new TmdbSimilarResponseDto();
+            response.setResults(filtered);
+            response.setTotalResults(filtered.size());
+            response.setPage(1);
+            response.setTotalPages(1);
+
+            return Optional.of(response);
 
         } catch (HttpClientErrorException e) {
             log.error("TMDB /similar API error for tmdbId {}: {}", tmdbId, e.getStatusCode());
@@ -78,52 +122,51 @@ public class TmdbService {
         }
     }
 
-    public Optional<TmdbSimilarResponseDto> getSimilarMovies(String imdbId) {
-        return resolveTmdbId(imdbId).flatMap(this::getSimilarMovies);
+    public Optional<TmdbSimilarResponseDto> getSimilarMovies(String imdbId, String type) {
+        return resolveTmdbId(imdbId, type)
+                .flatMap(lookup -> getSimilarMovies(lookup, type));
     }
 
-    public TmdbSimilarResponseDto getSimilarMoviesByImdbId(String imdbId) {
-
-        try {
-
-            String findUrl = UriComponentsBuilder
-                    .fromUriString(baseUrl + "/find/" + imdbId)
-                    .queryParam("api_key", apiKey)
-                    .queryParam("external_source", "imdb_id")
-                    .toUriString();
-
-            TmdbFindResponse findResponse = restTemplate.getForObject(findUrl, TmdbFindResponse.class);
-
-            if (findResponse == null || findResponse.getMovieResults().isEmpty()) {
-                return null;
-            }
-
-            Long tmdbId = findResponse.getMovieResults().get(0).getId();
-
-            return getSimilarMovies(tmdbId).get();
-
-        } catch (Exception e) {
-            log.error("Failed to fetch similar movies for imdbId {}", imdbId, e);
-            return null;
-        }
-    }
-
-    private Optional<Long> resolveTmdbId(String imdbId) {
+    private Optional<TmdbLookUpResult> resolveTmdbId(String imdbId, String type) {
         try {
             String findUrl = UriComponentsBuilder
                     .fromUriString(baseUrl + "/find/" + imdbId)
                     .queryParam("api_key", apiKey)
                     .queryParam("external_source", "imdb_id")
                     .toUriString();
+
+            System.out.println("FIndUrl : " + findUrl);
 
             TmdbFindResponse response = restTemplate.getForObject(findUrl, TmdbFindResponse.class);
 
-            if (response == null || response.getMovieResults().isEmpty()) {
-                log.warn("No TMDB match found for imdbId: {}", imdbId);
+            if (response == null) {
                 return Optional.empty();
             }
 
-            return Optional.of(response.getMovieResults().get(0).getId());
+            if ("movie".equalsIgnoreCase(type)) {
+                if (response.getMovieResults() == null || response.getMovieResults().isEmpty()) {
+                    log.warn("No movie found for imdbId: {}", imdbId);
+                    return Optional.empty();
+                }
+
+                return Optional.of(new TmdbLookUpResult(
+                        response.getMovieResults().get(0).getId(),
+                        response.getMovieResults().get(0).getOriginalLanguage()));
+            }
+
+            if ("tv".equalsIgnoreCase(type)) {
+                if (response.getTvResults() == null || response.getTvResults().isEmpty()) {
+                    log.warn("No TV show found for imdbId: {}", imdbId);
+                    return Optional.empty();
+                }
+
+                return Optional.of(new TmdbLookUpResult(
+                        response.getTvResults().get(0).getId(),
+                        response.getTvResults().get(0).getOriginalLanguage()));
+            }
+
+            log.warn("Unsupported media type: {}", type);
+            return Optional.empty();
 
         } catch (HttpClientErrorException e) {
             log.error("TMDB /find API error for imdbId {}: {}", imdbId, e.getStatusCode());
@@ -177,6 +220,6 @@ public class TmdbService {
                 tmdbid +
                 "?api_key=" + apiKey + "&append_to_response=combined_credits,external_ids";
 
-                return restTemplate.getForObject(url, String.class);
+        return restTemplate.getForObject(url, String.class);
     }
 }

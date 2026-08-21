@@ -25,6 +25,11 @@ public class TmdbSimilarResponseDto {
 
         private String title;
 
+        private String name;
+
+        @JsonProperty("original_name")
+        private String originalname;
+
         @JsonProperty("original_title")
         private String originalTitle;
 

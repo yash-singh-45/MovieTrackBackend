@@ -12,7 +12,7 @@ public class TmdbFindResponse {
     private List<TmdbMovieResult> movieResults;
 
     @JsonProperty("tv_results")
-    private List<Object> tvResults;
+    private List<TmdbTvResult> tvResults;
 
     @JsonProperty("person_results")
     private List<Object> personResults;
@@ -32,5 +32,28 @@ public class TmdbFindResponse {
 
         @JsonProperty("vote_average")
         private double voteAverage;
+
+        @JsonProperty("original_language")
+        private String originalLanguage;
+    }
+
+    @Data
+    public static class TmdbTvResult {
+
+        private Long id;
+
+        private String name;
+
+        @JsonProperty("first_air_date")
+        private String firstAirDate;
+
+        @JsonProperty("poster_path")
+        private String posterPath;
+
+        @JsonProperty("vote_average")
+        private double voteAverage;
+
+        @JsonProperty("original_language")
+        private String originalLanguage;
     }
 }
