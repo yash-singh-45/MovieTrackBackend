@@ -197,9 +197,10 @@ public class TmdbService {
     public String getImdbId(String tmdbId, String mediaType) {
 
         String url = "https://api.themoviedb.org/3/"
-                + mediaType + "/"
-                + tmdbId
-                + "?api_key=" + apiKey;
+        + mediaType + "/"
+        + tmdbId
+        + "/external_ids"
+        + "?api_key=" + apiKey;
 
         return restTemplate.getForObject(url, String.class);
     }
